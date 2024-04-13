@@ -30,7 +30,8 @@ import {VRFConsumerBaseV2} from "@chainlink/contracts/src/v0.8/vrf/VRFConsumerBa
 contract Raffle is VRFConsumerBaseV2 {
     error Raffle__NotEnoughtETHSent();
     error Raffle__TransferFailed();
-    error Raffle__NotOpen);
+    error Raffle__NotOpen();
+    error Raffle__UpkeopNotNeeded(uint256 currentBalance, uint256 numPlayers, uint256 raffleState);
 
     /* types */
     enum RaffleState{
@@ -83,7 +84,7 @@ contract Raffle is VRFConsumerBaseV2 {
         if (msg.value < i_entranceFee) {
             revert Raffle__NotEnoughtETHSent();
         }
-         if (ss_raffleState != RaffleState.OPEN) {
+         if (s_raffleState != RaffleState.OPEN) {
             revert Raffle__NotOpen();
         }
         s_players.push(payable(msg.sender));
@@ -107,7 +108,16 @@ contract Raffle is VRFConsumerBaseV2 {
 
 
 
-    function pickWinner() public {
+    function perfomUpkeep(bytes calldata /*performData*/) external {
+        (bool upkeepNeeded,) = checkUpKeep("");
+        if (!upkeepNeeded) {
+            revert Raffle__UpkeopNotNeeded(
+                address(this).balance,
+                s_players.length,
+                uint256(s_raffleState)
+            );
+        }
+
         uint256 requestId = i_vrfCoordinator.requestRandomWords(
             i_gasLane, 
             i_subscriptionId, 
@@ -115,7 +125,7 @@ contract Raffle is VRFConsumerBaseV2 {
             i_callBackGasLimit, 
             NUM_WORDS
         );
-        s_raffleState = Raffle.CALCULATING_WINNER;
+        s_raffleState = RaffleState.CALCULATING_WINNER;
     }
 
     function fulfillRandomWords (
@@ -141,7 +151,7 @@ contract Raffle is VRFConsumerBaseV2 {
     /**
      * getters and setters
      */
-    function getEntranceFee() external view returns (uiWinnerPickednt256) {
+    function getEntranceFee() external view returns (uint256) {
         return i_entranceFee;
     }
 }
