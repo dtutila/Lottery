@@ -21,8 +21,8 @@ contract DeployRaffle is Script {
         ) = helperConfig.activeNetworkConfig();
 
         if (subscriptionId == 0) {
-           CreateSubscription createSubscription = new CreateSubscription();
-           subscriptionId = createSubscription.createSubscription(vrfCoordinator);
+            CreateSubscription createSubscription = new CreateSubscription();
+            subscriptionId = createSubscription.createSubscription(vrfCoordinator);
 
             FundSubscription fundSubscription = new FundSubscription();
             fundSubscription.fundSubscription(vrfCoordinator, subscriptionId, linkAddress);
@@ -35,7 +35,7 @@ contract DeployRaffle is Script {
 
         AddConsumer addConsumer = new AddConsumer();
         addConsumer.addConsumer(address(raffle), vrfCoordinator, subscriptionId);
-        
+
         return (raffle, helperConfig);
     }
 }
