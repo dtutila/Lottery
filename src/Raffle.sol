@@ -74,7 +74,7 @@ contract Raffle is VRFConsumerBaseV2 {
         i_interval = interval;
         i_vrfCoordinator = VRFCoordinatorV2Interface(vrfCoordinator);
         i_gasLane = gasLane;
-        i_subscriptionId -= subscriptionId;
+        i_subscriptionId = subscriptionId;
         i_callBackGasLimit = callBackGasLimit;
         s_lastTimeStamp = block.timestamp;
         s_raffleState = RaffleState.OPEN;

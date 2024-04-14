@@ -3,7 +3,7 @@
 pragma solidity ^0.8.25;
 
 import {Script} from "forge-std/Script.sol";
-import {VRFCoordinatorV2Mock} from "@chainlink/contracts/src/v0.8/mocks/VRFCoordinatorV2Mock.sol";
+import {VRFCoordinatorV2Mock} from "../test/mocks/VRFCoordinatorV2Mock.sol";
 import {LinkToken} from "../test/mocks/LinkToken.sol";
 
 contract HelperConfig is Script {
@@ -36,7 +36,6 @@ contract HelperConfig is Script {
             subscriptionId: 0,
             callBackGasLimit: 500000,
             linkAddress: 0x779877A7B0D9E8603169DdbD7836e478b4624789
-
         });
     }
 
@@ -57,7 +56,7 @@ contract HelperConfig is Script {
             gasLane: 0x474e34a077df58807dbe9c96d3c009b23b3c6d0cce433e59bbf5b34f823bc56c,
             subscriptionId: 0,
             callBackGasLimit: 500000,
-            linkAddress:address(linkToken)
+            linkAddress: address(linkToken)
         });
     }
 }
