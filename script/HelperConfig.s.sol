@@ -15,10 +15,10 @@ contract HelperConfig is Script {
         uint32 callBackGasLimit;
     }
 
-    NetworkCofig public activeNetworkConfig; 
+    NetworkCofig public activeNetworkConfig;
 
-    constructor (){
-        if (block.chainid == 11155111){
+    constructor() {
+        if (block.chainid == 11155111) {
             activeNetworkConfig = getSepoliaConfig();
         } else {
             activeNetworkConfig = getAnvilConfig();
@@ -36,11 +36,11 @@ contract HelperConfig is Script {
         });
     }
 
-    function getAnvilConfig() public  returns (NetworkCofig memory) {
-        if ( activeNetworkConfig.vrfCoordinator != address(0)) {
+    function getAnvilConfig() public returns (NetworkCofig memory) {
+        if (activeNetworkConfig.vrfCoordinator != address(0)) {
             return activeNetworkConfig;
         }
-        uint96 _baseFee = 0.25 ether; 
+        uint96 _baseFee = 0.25 ether;
         uint96 _gasPriceLink = 1e9;
         vm.startBroadcast();
         VRFCoordinatorV2Mock vrfMock = new VRFCoordinatorV2Mock(_baseFee, _gasPriceLink);
