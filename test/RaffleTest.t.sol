@@ -7,6 +7,7 @@ import {Raffle} from "../src/Raffle.sol";
 import {Test} from "forge-std/Test.sol";
 import {HelperConfig} from "../script/HelperConfig.s.sol";
 import {Vm} from "forge-std/Vm.sol";
+import {VRFCoordinatorV2Mock} from "./mocks/VRFCoordinatorV2Mock.sol";
 
 contract RaffleTest is Test {
     Raffle raffle;
@@ -146,10 +147,44 @@ contract RaffleTest is Test {
 
     //fulfill random words
 
-    function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep() 
-    public 
-    raffleEnteredAndTimePassed
+    function testFulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(
+        uint256 randomTestId
+        ) public  raffleEnteredAndTimePassed
     {
+        vm.expectRevert("nonexistent request");
+        VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(randomTestId, address(raffle));
+    }
+
+    function testFulfillRandomWordsPinksAWinerResetAndSendPrize() 
+    public 
+    raffleEnteredAndTimePassed 
+    {
+        uint256 additionalEntrants = 5;
+        uint256 startingIndex = 1;
+        for (uint256 i = startingIndex; i < startingIndex + additionalEntrants; i++) {
+            address player = address(uint160(i));
+            hoax(player, INITIAL_BALANCE);
+            raffle.enterRaffle{value: entranceFee}();   
+        }
+
+        uint256 prize = entranceFee * (additionalEntrants + 1);
+        //getting requestId
+        vm.recordLogs();
+        raffle.perfomUpkeep("");
+        Vm.Log[] memory entries = vm.getRecordedLogs();
+        bytes32 requestId = entries[1].topics[1];
+        uint256 previousTimeStamp = raffle.getLastTimeStamp();
+
+         VRFCoordinatorV2Mock(vrfCoordinator).fulfillRandomWords(
+            uint256(requestId), 
+            address(raffle)
+            );
+
+        assert(uint256(raffle.getRaffleState()) == 0);
+        assert(raffle.getRecentWinner() != address(0));
+        assert(raffle.getLengthOfPlayers() == 0);
+        assert(previousTimeStamp < raffle.getLastTimeStamp());
+        assert(raffle.getRecentWinner().balance == INITIAL_BALANCE + prize - entranceFee);
 
     }
 }
