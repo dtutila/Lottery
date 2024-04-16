@@ -19,16 +19,25 @@ contract RaffleTest is Test {
     uint64 subscriptionId;
     uint32 callBackGasLimit;
     address linkAddress;
-
+    uint256 deployerKey;
     address alice = makeAddr("Alice");
-    //address bob = makeAddr("Bob");
     uint256 constant INITIAL_BALANCE = 10 ether;
 
     function setUp() external {
         DeployRaffle deployer = new DeployRaffle();
         (raffle, helperConfig) = deployer.run();
-        (entranceFee, interval, vrfCoordinator, gasLane, subscriptionId, callBackGasLimit, linkAddress) =
-            helperConfig.activeNetworkConfig();
+        (
+            interval,  
+            entranceFee,
+            deployerKey
+        ) = helperConfig.activeNetworkConfig();
+        (
+            vrfCoordinator,
+            linkAddress,   
+            gasLane,
+            subscriptionId,  
+            callBackGasLimit
+        ) = helperConfig.activeVFRConfig();
         vm.deal(alice, INITIAL_BALANCE);
     }
 

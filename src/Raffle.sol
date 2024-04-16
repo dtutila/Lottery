@@ -132,7 +132,7 @@ contract Raffle is VRFConsumerBaseV2 {
         if (!success) {
             revert Raffle__NotEnoughtETHSent();
         }
-
+        emit RequestedRaffleWinner(requestId);
         emit PickedWinner(winner);
     }
 

@@ -11,30 +11,34 @@ contract DeployRaffle is Script {
     function run() external returns (Raffle, HelperConfig) {
         HelperConfig helperConfig = new HelperConfig();
         (
-            uint256 entranceFee,
-            uint256 interval,
+          uint256 interval,
+        uint256 entranceFee,
+        uint256 deployerKey
+            
+        ) = helperConfig.activeNetworkConfig();
+         (
             address vrfCoordinator,
+            address linkAddress,
             bytes32 gasLane,
             uint64 subscriptionId,
-            uint32 callBackGasLimit,
-            address linkAddress
-        ) = helperConfig.activeNetworkConfig();
+            uint32 callBackGasLimit
+        ) = helperConfig.activeVFRConfig();
 
         if (subscriptionId == 0) {
             CreateSubscription createSubscription = new CreateSubscription();
-            subscriptionId = createSubscription.createSubscription(vrfCoordinator);
+            subscriptionId = createSubscription.createSubscription(vrfCoordinator, deployerKey);
 
             FundSubscription fundSubscription = new FundSubscription();
-            fundSubscription.fundSubscription(vrfCoordinator, subscriptionId, linkAddress);
+            fundSubscription.fundSubscription(vrfCoordinator, subscriptionId, linkAddress,deployerKey);
         }
 
-        vm.startBroadcast();
+        vm.startBroadcast(deployerKey);
         Raffle raffle = new Raffle(entranceFee, interval, vrfCoordinator, gasLane, subscriptionId, callBackGasLimit);
 
         vm.stopBroadcast();
 
         AddConsumer addConsumer = new AddConsumer();
-        addConsumer.addConsumer(address(raffle), vrfCoordinator, subscriptionId);
+        addConsumer.addConsumer(address(raffle), vrfCoordinator, subscriptionId, deployerKey);
 
         return (raffle, helperConfig);
     }
