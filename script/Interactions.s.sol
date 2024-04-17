@@ -11,7 +11,7 @@ import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 contract CreateSubscription is Script {
     function createSunscriptionusingConfig() public returns (uint64) {
         HelperConfig helperConfig = new HelperConfig();
-         (address vrfCoordinator,,,uint64 subscriptionId,) = helperConfig.activeVFRConfig();
+         (address vrfCoordinator,,,,) = helperConfig.activeVFRConfig();
          (,,uint256 deployerKey) = helperConfig.activeNetworkConfig();
 
         return createSubscription(vrfCoordinator, deployerKey);
@@ -60,7 +60,13 @@ contract FundSubscription is Script {
             VRFCoordinatorV2Mock(vrfCoordinator).fundSubscription(subscriptionId, FUND_AMOUNT);
             vm.stopBroadcast();
         } else {
-            LinkToken(linkAddress).transferAndCall(vrfCoordinator, FUND_AMOUNT, abi.encode(subscriptionId));
+            vm.startBroadcast(deployerKey);
+            LinkToken(linkAddress).transferAndCall(
+                vrfCoordinator, 
+                FUND_AMOUNT, 
+                abi.encode(subscriptionId)
+            );
+            vm.stopBroadcast();
         }
     }
 
